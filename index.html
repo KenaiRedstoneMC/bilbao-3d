@@ -2,126 +2,46 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Bilbao 3D Game</title>
+<title>Bilbao REAL 3D</title>
 
-<link href="https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css" rel="stylesheet" />
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.121/Build/Cesium/Cesium.js"></script>
+<link href="https://cesium.com/downloads/cesiumjs/releases/1.121/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
 
 <style>
-  body { margin:0; overflow:hidden; }
-  #map { position:absolute; top:0; bottom:0; width:100%; }
-
-  /* HUD jugador */
-  #hud {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 10;
-    background: rgba(0,0,0,0.5);
-    color: white;
-    padding: 10px;
-    font-family: sans-serif;
-    border-radius: 8px;
-  }
-
-  #crosshair {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 10px;
-    height: 10px;
-    margin-left: -5px;
-    margin-top: -5px;
-    background: red;
-    border-radius: 50%;
-    z-index: 10;
-  }
+html, body, #cesiumContainer {
+  width:100%;
+  height:100%;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+}
 </style>
 </head>
 
 <body>
-
-<div id="map"></div>
-<div id="hud">WASD para moverte</div>
-<div id="crosshair"></div>
-
-<script src="https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js"></script>
+<div id="cesiumContainer"></div>
 
 <script>
-// 🌍 MAPA SATÉLITE (ESRI gratis)
-const map = new maplibregl.Map({
-  container: 'map',
-  style: {
-    version: 8,
-    sources: {
-      sat: {
-        type: "raster",
-        tiles: [
-          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-        ],
-        tileSize: 256,
-        attribution: "Tiles © Esri"
-      }
-    },
-    layers: [
-      {
-        id: "sat",
-        type: "raster",
-        source: "sat"
-      }
-    ]
-  },
-  center: [-2.935, 43.263], // Bilbao
-  zoom: 16,
-  pitch: 60,
-  bearing: -20
+const viewer = new Cesium.Viewer('cesiumContainer', {
+  terrain: Cesium.Terrain.fromWorldTerrain(),
+  timeline:false,
+  animation:false
 });
 
-// 🏙️ EDIFICIOS 3D (OSM simple)
-map.on("load", () => {
-
-  map.addLayer({
-    id: "3d-buildings",
-    source: "composite",
-    "source-layer": "building",
-    type: "fill-extrusion",
-    minzoom: 15,
-    paint: {
-      "fill-extrusion-color": "#aaa",
-      "fill-extrusion-height": ["get", "height"],
-      "fill-extrusion-base": ["get", "min_height"],
-      "fill-extrusion-opacity": 0.6
-    }
-  });
-
-});
-
-// 🎮 JUGADOR (SIMULADO)
-let speed = 0.0005;
-
-document.addEventListener("keydown", (e) => {
-  let center = map.getCenter();
-
-  switch(e.key.toLowerCase()) {
-    case "w":
-      map.setCenter([center.lng, center.lat + speed]);
-      break;
-    case "s":
-      map.setCenter([center.lng, center.lat - speed]);
-      break;
-    case "a":
-      map.setCenter([center.lng - speed, center.lat]);
-      break;
-    case "d":
-      map.setCenter([center.lng + speed, center.lat]);
-      break;
+// 🌍 Ir a Bilbao REAL
+viewer.camera.flyTo({
+  destination: Cesium.Cartesian3.fromDegrees(-2.935, 43.263, 800),
+  orientation: {
+    heading: 0,
+    pitch: -0.8,
+    roll: 0
   }
 });
 
-// 🎥 cámara estilo juego
-map.setPitch(70);
-map.setZoom(17);
-
+// 🏙 Activar edificios reales 3D
+const osmBuildings = viewer.scene.primitives.add(
+  Cesium.createOsmBuildings()
+);
 </script>
 
 </body>
