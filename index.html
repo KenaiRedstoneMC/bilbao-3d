@@ -9,11 +9,11 @@
 
 <style>
 html, body, #cesiumContainer {
-  width:100%;
-  height:100%;
-  margin:0;
-  padding:0;
-  overflow:hidden;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 </style>
 </head>
@@ -22,15 +22,32 @@ html, body, #cesiumContainer {
 <div id="cesiumContainer"></div>
 
 <script>
-const viewer = new Cesium.Viewer('cesiumContainer', {
-  terrain: Cesium.Terrain.fromWorldTerrain(),
-  timeline:false,
-  animation:false
+// 🌍 VISOR CESIUM (CONFIGURACIÓN CORRECTA)
+const viewer = new Cesium.Viewer("cesiumContainer", {
+
+  // 🗺️ MAPA BASE (esto evita el "espacio vacío")
+  imageryProvider: new Cesium.IonImageryProvider({
+    assetId: 2
+  }),
+
+  // 🌍 TERRENO REAL
+  terrainProvider: Cesium.Terrain.fromWorldTerrain(),
+
+  animation: false,
+  timeline: false,
+  baseLayerPicker: false,
+  geocoder: false,
+  navigationHelpButton: false
 });
 
-// 🌍 Ir a Bilbao REAL
-viewer.camera.flyTo({
-  destination: Cesium.Cartesian3.fromDegrees(-2.935, 43.263, 800),
+// 🏙️ EDIFICIOS REALES 3D
+viewer.scene.primitives.add(
+  Cesium.createOsmBuildings()
+);
+
+// 📍 BILBAO REAL
+viewer.camera.setView({
+  destination: Cesium.Cartesian3.fromDegrees(-2.935, 43.263, 1200),
   orientation: {
     heading: 0,
     pitch: -0.8,
@@ -38,10 +55,9 @@ viewer.camera.flyTo({
   }
 });
 
-// 🏙 Activar edificios reales 3D
-const osmBuildings = viewer.scene.primitives.add(
-  Cesium.createOsmBuildings()
-);
+// 🌤️ mejorar iluminación (evita pantalla “vacía”)
+viewer.scene.globe.enableLighting = true;
+
 </script>
 
 </body>
